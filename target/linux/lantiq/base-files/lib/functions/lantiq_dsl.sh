@@ -64,6 +64,12 @@ scale_latency() {
 	printf "%d.%d ms" ${a} ${b}
 }
 
+scale_latency_us() {
+	local val=$1
+
+	expr $val \* 10
+}
+
 #
 # convert vendorid into human readable form
 #
@@ -166,20 +172,18 @@ data_rates() {
 chipset() {
 	local vig
 	local cs
-	local csv
 
 	vig=$(dsl_cmd vig)
 	cs=$(dsl_val "$vig" DSL_ChipSetType)
-	csv=$(dsl_val "$vig" DSL_ChipSetHWVersion)
 	csfw=$(dsl_val "$vig" DSL_ChipSetFWVersion)
 	csapi=$(dsl_val "$vig" DSL_DriverVersionApi)
 
 	if [ "$action" = "lucistat" ]; then
-		echo "dsl.chipset=\"${cs} ${csv}\""
+		echo "dsl.chipset=\"${cs}\""
 		echo "dsl.firmware_version=\"${csfw}\""
 		echo "dsl.api_version=\"${csapi}\""
 	else
-		echo "Chipset:                                  ${cs} ${csv}"
+		echo "Chipset:                                  ${cs}"
 		echo "Firmware Version:                         ${csfw}"
 		echo "API Version:                              ${csapi}"
 	fi
@@ -430,12 +434,14 @@ latency_delay() {
 	sidd=$(scale_latency $idd)
 
 	if [ "$action" = "lucistat" ]; then
+		echo "dsl.latency_down=\"$(scale_latency_us $idd)\""
+		echo "dsl.latency_up=\"$(scale_latency_us $idu)\""
 		echo "dsl.latency_num_down=\"$sidd\""
 		echo "dsl.latency_num_up=\"$sidu\""
 		echo "dsl.latency_s_down=\"$idd_s\""
 		echo "dsl.latency_s_up=\"$idu_s\""
 	else
-		echo "Latency / Interleave Delay:               Down: ${idd_s} (${sidd}) / Up: ${idu_s} (${sidu})"
+		echo "Latency [Interleave Delay]:               ${sidd} [${idd_s}]   ${sidu} [${idu_s}]"
 	fi
 }
 
@@ -623,23 +629,23 @@ line_data() {
 	sattndru=$(scale $attndru)
 	
 	if [ "$action" = "lucistat" ]; then
-		echo "dsl.line_attenuation_down=$latnd"
-		echo "dsl.line_attenuation_up=$latnu"
-		echo "dsl.noise_margin_down=$snrd"
-		echo "dsl.noise_margin_up=$snru"
-		echo "dsl.signal_attenuation_down=$satnd"
-		echo "dsl.signal_attenuation_up=$satnu"
-		echo "dsl.actatp_down=$actatpd"
-		echo "dsl.actatp_up=$actatpu"
+		echo "dsl.line_attenuation_down=\"$latnd\""
+		echo "dsl.line_attenuation_up=\"$latnu\""
+		echo "dsl.noise_margin_down=\"$snrd\""
+		echo "dsl.noise_margin_up=\"$snru\""
+		echo "dsl.signal_attenuation_down=\"$satnd\""
+		echo "dsl.signal_attenuation_up=\"$satnu\""
+		echo "dsl.actatp_down=\"$actatpd\""
+		echo "dsl.actatp_up=\"$actatpu\""
 		echo "dsl.max_data_rate_down=$attndrd"
 		echo "dsl.max_data_rate_up=$attndru"
 		echo "dsl.max_data_rate_down_s=\"$sattndrd\""
 		echo "dsl.max_data_rate_up_s=\"$sattndru\""
 	else
-		echo "Line Attenuation (LATN):                  Down: ${latnd}dB / Up: ${latnu}dB"
-		echo "Signal Attenuation (SATN):                Down: ${satnd}dB / Up: ${satnu}dB"
-		echo "Noise Margin (SNR):                       Down: ${snrd}dB / Up: ${snru}dB"
-		echo "Aggregate Transmit Power (ACTATP):        Down: ${actatpd}dB / Up: ${actatpu}dB"
+		echo "Line Attenuation (LATN):                  Down: ${latnd} dB / Up: ${latnu} dB"
+		echo "Signal Attenuation (SATN):                Down: ${satnd} dB / Up: ${satnu} dB"
+		echo "Noise Margin (SNR):                       Down: ${snrd} dB / Up: ${snru} dB"
+		echo "Aggregate Transmit Power (ACTATP):        Down: ${actatpd} dB / Up: ${actatpu} dB"
 		echo "Max. Attainable Data Rate (ATTNDR):       Down: ${sattndrd}/s / Up: ${sattndru}/s"
 	fi
 }

@@ -2,8 +2,11 @@
 
 #include "rt3050.dtsi"
 
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
 / {
-	compatible = "CARAMBOLA", "ralink,rt3050-soc";
+	compatible = "8devices,carambola", "ralink,rt3050-soc";
 	model = "8devices Carambola";
 
 	chosen {
@@ -15,36 +18,41 @@
 		reg = <0x1f000000 0x800000>;
 		bank-width = <2>;
 		device-width = <2>;
-		#address-cells = <1>;
-		#size-cells = <1>;
 
-		partition@0 {
-			label = "u-boot";
-			reg = <0x0 0x30000>;
-			read-only;
-		};
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
 
-		partition@30000 {
-			label = "u-boot-env";
-			reg = <0x30000 0x10000>;
-			read-only;
-		};
+			partition@0 {
+				label = "u-boot";
+				reg = <0x0 0x30000>;
+				read-only;
+			};
 
-		factory: partition@40000 {
-			label = "factory";
-			reg = <0x40000 0x10000>;
-			read-only;
-		};
+			partition@30000 {
+				label = "u-boot-env";
+				reg = <0x30000 0x10000>;
+				read-only;
+			};
 
-		partition@50000 {
-			label = "firmware";
-			reg = <0x50000 0x7b0000>;
+			factory: partition@40000 {
+				label = "factory";
+				reg = <0x40000 0x10000>;
+				read-only;
+			};
+
+			partition@50000 {
+				compatible = "denx,uimage";
+				label = "firmware";
+				reg = <0x50000 0x7b0000>;
+			};
 		};
 	};
 
 	i2c-gpio {
 		compatible = "i2c-gpio";
-		gpios = <&gpio0 1 0 &gpio0 2 0>;
+		gpios = <&gpio0 1 GPIO_ACTIVE_HIGH &gpio0 2 GPIO_ACTIVE_HIGH>;
 		i2c-gpio,delay-us = <10>;
 	};
 };

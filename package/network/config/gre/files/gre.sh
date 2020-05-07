@@ -25,13 +25,23 @@ gre_generic_setup() {
 	json_add_string mode "$mode"
 	json_add_int mtu "${mtu:-1280}"
 	[ -n "$df" ] && json_add_boolean df "$df"
-	[ -n "ttl" ] && json_add_int ttl "$ttl"
+	[ -n "$ttl" ] && json_add_int ttl "$ttl"
 	[ -n "$tos" ] && json_add_string tos "$tos"
 	json_add_boolean multicast "$multicast"
 	json_add_string local "$local"
 	json_add_string remote "$remote"
 	[ -n "$tunlink" ] && json_add_string link "$tunlink"
-	json_add_string info "${ikey:-0},${okey:-0},${icsum:-0},${ocsum:-0},${iseqno:-0},${oseqno:-0}"
+
+	json_add_object 'data'
+	[ -n "$ikey" ] && json_add_int ikey "$ikey"
+	[ -n "$okey" ] && json_add_int okey "$okey"
+	[ -n "$icsum" ] && json_add_boolean icsum "$icsum"
+	[ -n "$ocsum" ] && json_add_boolean ocsum "$ocsum"
+	[ -n "$iseqno" ] && json_add_boolean iseqno "$iseqno"
+	[ -n "$oseqno" ] && json_add_boolean oseqno "$oseqno"
+	[ -n "$encaplimit" ] && json_add_string encaplimit "$encaplimit"
+	json_close_object
+
 	proto_close_tunnel
 
 	proto_add_data
@@ -124,7 +134,7 @@ grev6_setup() {
 	local remoteip6
 
 	local ip6addr peer6addr weakif
-	json_get_vars ip6addr peer6addr tunlink weakif
+	json_get_vars ip6addr peer6addr tunlink weakif encaplimit
 
 	[ -z "$peer6addr" ] && {
 		proto_notify_error "$cfg" "MISSING_PEER_ADDRESS"
@@ -265,6 +275,7 @@ proto_grev6_init_config() {
 	proto_config_add_string "ip6addr"
 	proto_config_add_string "peer6addr"
 	proto_config_add_string "weakif"
+	proto_config_add_string "encaplimit"
 }
 
 proto_grev6tap_init_config() {
